@@ -4,6 +4,11 @@ output:
   html_document:
     keep_md: true
 ---
+
+
+```r
+knitr::opts_chunk$set(echo=TRUE,warning=FALSE, error=FALSE, message=FALSE)
+```
 ## Background
 This report was prepared for the JHU Reproducible Research Course, week 2 assignment. 
 
@@ -11,33 +16,12 @@ An analysis was performed on data generated from a study which measured the numb
 
 ## Loading and preprocessing the data
 
-First packages required for data processing and analysis must be loade and global options set.    
+First packages required for data processing and analysis must be loaded:    
 
 ```r
 library("dplyr")
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library("lattice")
 library("knitr")
-knitr::opts_chunk$set(echo=TRUE,warning=FALSE, error=FALSE, message=FALSE)
 ```
 
 Data from the study is located in this GIT hub repository. The data is contained in a comma-separated-value(CSV) file, and should comprising 3 fields and 17568 observations.
@@ -87,6 +71,7 @@ hist(dfs$TotalSteps,
 MeanSteps<-mean(dfs$TotalSteps,na.rm=TRUE)
 MeanSteps<- round(MeanSteps,0)
 MedianSteps<-median(dfs$TotalSteps,na.rm=TRUE)
+MedianSteps<-as.integer(MedianSteps)
 
 
 # plot the mean and median lines
@@ -97,7 +82,7 @@ abline(v=MedianSteps,lty=3,lwd=2,col="red")
 legend("topright", lty=c(2,3),lwd=2,col="red",legend=c("Mean","Median"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 The mean total number of steps per day is 9354 and the median total number of steps is 10395.
 
@@ -123,7 +108,7 @@ with(dfia,plot(interval,
                ylab="Average Steps"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 ```r
 # find which interval has the highest average using grep to return the interval number that matches to
@@ -144,9 +129,9 @@ NumberNA=sum(is.na(df))
 
 The number of records with missing data is 2304.  
 
-The missing values may influence the results and analysis. To understand the impact, the missing values iwll be replaced with the following:  
+The missing values may influence the results and analysis. To understand the impact, the missing values will be replaced with the following:  
 - Daily mean number of steps  
-- 0 if there are no steps recorded for a day (all records NA)  
+- 0 steps if there are no steps recorded for a day (all records NA)  
 
 Calculate the daily mean number of steps:
 
@@ -154,11 +139,11 @@ Calculate the daily mean number of steps:
 dailyaverage<-summarise(dfg,AverageSteps=mean(steps,na.rm=TRUE))
 ```
 
-For comparison with the origin df data frame, a duplicate data frame is created.  
-To find the missing values, we loop through the data frame and check for NA. Values which are replaced as required.  
+For comparison with the original data frame, a duplicate data frame is created.  
+To find the missing values, we loop through the data frame and check for NA values and are replaced as required.  
 
 ```r
-#duplicate original dataframe
+#duplicate original data frame
 dfcomplete<-df
 
 # loop through all records in 
@@ -204,6 +189,7 @@ hist(dfcompletes$TotalSteps,col="blue",main="Total Steps per Day",xlab="Total St
 MeanStepsComplete<-mean(dfcompletes$TotalSteps,na.rm=TRUE)
 MeanStepsComplete<- round(MeanSteps,0)
 MedianStepsComplete<-median(dfcompletes$TotalSteps,na.rm=TRUE)
+MedianStepsComplete<-as.integer(MedianStepsComplete)
 
 
 # plot the mean and median lines
@@ -214,10 +200,10 @@ abline(v=MedianStepsComplete,lty=3,lwd=2,col="red")
 legend("topright", lty=c(2,3),lwd=2,col="red",legend=c("Mean","Median"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 The mean total number of steps per day is now 9354 compared to 9354.  
-The median total number of steps is now 1.0395\times 10^{4}, compared to 10395.
+The median total number of steps is now 10395 compared to 10395.
 
 Therefore replacing missing values with the average value, instead of ignoring them does not change the mean or median results.  
 
@@ -246,19 +232,19 @@ dayfactor<-factor(dfcomplete$DayofWeek,levels=daynames,labels=WDWE)
 dfcomplete<-mutate(dfcomplete,DayFactor=dayfactor)
 ```
 
-Now the data set is prepared, it is grouped by DayFactore (weekend/weekday) and the interval.  
+Now the data set is prepared, it is grouped by DayFactor (weekend/weekday) and the interval.  
 
 ```r
-dfcompletea<-group_by(dfcomplete,DayFactor,interval)
-dfcompleteaa<-summarise(dfcompletea,AverageSteps=mean(steps,na.rm=TRUE))
+dfcompletei<-group_by(dfcomplete,DayFactor,interval)
+dfcompleteia<-summarise(dfcompletei,AverageSteps=mean(steps,na.rm=TRUE))
 ```
 
 
-The trends for Weekday and Weekend activity is best undestod with a time series plots for each.
+The trends for Weekday and Weekend activity are best understood with a time series plots for each.
 
 ```r
-p<-xyplot(dfcompleteaa$AverageSteps~dfcompleteaa$interval|dfcompleteaa$DayFactor,
-          data=dfcompleteaa,
+p<-xyplot(dfcompleteia$AverageSteps~dfcompleteia$interval|dfcompleteia$DayFactor,
+          data=dfcompleteia,
           layout=c(1,2),
           type="l",
           xlab="Interval",
@@ -267,6 +253,6 @@ p<-xyplot(dfcompleteaa$AverageSteps~dfcompleteaa$interval|dfcompleteaa$DayFactor
 print(p)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 More activity is observed on weekday mornings however the overall average number of steps is higher during the weekend. This indicates the test subject may have been an office based worked who had a higher number of steps commuting to work and spent the day at their desk.  

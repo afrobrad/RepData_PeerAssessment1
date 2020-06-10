@@ -52,6 +52,7 @@ hist(dfs$TotalSteps,
 MeanSteps<-mean(dfs$TotalSteps,na.rm=TRUE)
 MeanSteps<- round(MeanSteps,0)
 MedianSteps<-median(dfs$TotalSteps,na.rm=TRUE)
+MedianSteps<-as.integer(MedianSteps)
 
 
 # plot the mean and median lines
@@ -154,6 +155,7 @@ hist(dfcompletes$TotalSteps,col="blue",main="Total Steps per Day",xlab="Total St
 MeanStepsComplete<-mean(dfcompletes$TotalSteps,na.rm=TRUE)
 MeanStepsComplete<- round(MeanSteps,0)
 MedianStepsComplete<-median(dfcompletes$TotalSteps,na.rm=TRUE)
+MedianStepsComplete<-as.integer(MedianStepsComplete)
 
 
 # plot the mean and median lines
@@ -165,7 +167,7 @@ legend("topright", lty=c(2,3),lwd=2,col="red",legend=c("Mean","Median"))
 ```
 
 The mean total number of steps per day is now `r MeanStepsComplete` compared to `r MeanSteps`.  
-The median total number of steps is now `r MedianStepsComplete`, compared to `r MedianSteps`.
+The median total number of steps is now `r MedianStepsComplete` compared to `r MedianSteps`.
 
 Therefore replacing missing values with the average value, instead of ignoring them does not change the mean or median results.  
 
