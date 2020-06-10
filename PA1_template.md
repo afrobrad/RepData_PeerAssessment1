@@ -6,9 +6,6 @@ output:
 ---
 
 
-```r
-knitr::opts_chunk$set(echo=TRUE,warning=FALSE, error=FALSE, message=FALSE)
-```
 ## Background
 This report was prepared for the JHU Reproducible Research Course, week 2 assignment. 
 
