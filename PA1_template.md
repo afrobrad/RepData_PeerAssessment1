@@ -4,10 +4,6 @@ output:
   html_document:
     keep_md: true
 ---
-
-```{R}
-knitr::opts_chunk$set(echo=TRUE,warning=FALSE, error=FALSE, message=FALSE)
-```
 ## Background
 This report was prepared for the JHU Reproducible Research Course, week 2 assignment. 
 
@@ -15,19 +11,56 @@ An analysis was performed on data generated from a study which measured the numb
 
 ## Loading and preprocessing the data
 
-First packages required for data processing and analysis must be loaded:    
-````{R} 
+First packages required for data processing and analysis must be loade and global options set.    
+
+```r
 library("dplyr")
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library("lattice")
 library("knitr")
-````
+knitr::opts_chunk$set(echo=TRUE,warning=FALSE, error=FALSE, message=FALSE)
+```
 
 Data from the study is located in this GIT hub repository. The data is contained in a comma-separated-value(CSV) file, and should comprising 3 fields and 17568 observations.
 
-```{R}
+
+```r
 df<-read.csv("./activity.csv",header=TRUE)
 dim(df)
+```
+
+```
+## [1] 17568     3
+```
+
+```r
 head(df,3)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
 ```
 
 Each question and analysis below requires the data to be prepared in a specific way. This will be covered in the sections below.
@@ -35,13 +68,15 @@ Each question and analysis below requires the data to be prepared in a specific 
 ## What is mean total number of steps taken per day?
 In order to calculated the average number of steps per day, we must first determine the total number of steps per day. The data must be grouped by date and the summarise() function can then be used to calculate the total steps per day. NA values are ignored and removed from the analysis using the rm.na setting.
 
-```{R}
+
+```r
 dfg<-group_by(df,date)
 dfs <- summarise(dfg,TotalSteps=sum(steps,na.rm=TRUE))
 ```
 
 To understand the distribution of results, data is plotted in a histogram
-```{R}
+
+```r
 hist(dfs$TotalSteps,
      col="blue",
      main="Frequency of Total Steps per Day",
@@ -62,19 +97,23 @@ abline(v=MedianSteps,lty=3,lwd=2,col="red")
 legend("topright", lty=c(2,3),lwd=2,col="red",legend=c("Mean","Median"))
 ```
 
-The mean total number of steps per day is `r MeanSteps` and the median total number of steps is `r MedianSteps`.
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+The mean total number of steps per day is 9354 and the median total number of steps is 10395.
 
 ## What is the average daily activity pattern?
 
 To understand how activity changes throughout the day, data must be grouped by interval. The average number of steps can the be calculated for the same interval across all the days included in the study.  
 
-```{R}
+
+```r
 dfi<-group_by(df,interval)
 dfia<-summarise(dfi,AverageSteps=mean(steps,na.rm=TRUE))
 ```
 
 Create A time series line plot to visualize the trend in average activity trend throughout the day.  
-```{R}
+
+```r
 with(dfia,plot(interval,
                AverageSteps,
                type="l",
@@ -82,36 +121,44 @@ with(dfia,plot(interval,
                main="Average steps per 5-Minute Interval",
                xlab="5-Minute Interval",
                ylab="Average Steps"))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+```r
 # find which interval has the highest average using grep to return the interval number that matches to
 # the max average.
 MaxSteps <- dfia[grep(max(dfia$AverageSteps),dfia$AverageSteps),]
 MaxSteps$AverageSteps <- round(MaxSteps$AverageSteps,0)
 ```
 
-The interval `r MaxSteps$interval` has the highest average activity of `r MaxSteps$AverageSteps` steps.
+The interval 835 has the highest average activity of 206 steps.
 
 ## Imputing missing values
 
 Determine the number of missing (NA) values in the data set:
-```{R}
+
+```r
 NumberNA=sum(is.na(df))
 ```
 
-The number of records with missing data is `r NumberNA`.  
+The number of records with missing data is 2304.  
 
-The missing values may influence the results and analysis. To understand the impact, the missing values will be replaced with the following:  
+The missing values may influence the results and analysis. To understand the impact, the missing values iwll be replaced with the following:  
 - Daily mean number of steps  
-- 0 steps if there are no steps recorded for a day (all records NA)  
+- 0 if there are no steps recorded for a day (all records NA)  
 
 Calculate the daily mean number of steps:
-```{R}
+
+```r
 dailyaverage<-summarise(dfg,AverageSteps=mean(steps,na.rm=TRUE))
 ```
 
-For comparison with the original data frame, a duplicate data frame is created.  
-To find the missing values, we loop through the data frame and check for NA values and are replaced as required.  
-```{R}
-#duplicate original data frame
+For comparison with the origin df data frame, a duplicate data frame is created.  
+To find the missing values, we loop through the data frame and check for NA. Values which are replaced as required.  
+
+```r
+#duplicate original dataframe
 dfcomplete<-df
 
 # loop through all records in 
@@ -134,20 +181,23 @@ for (i in 1:nrow(dfcomplete))
 ```
 
 Confirm all missing (NA) values have been replaced:  
-```{R}
+
+```r
 NumberNAComplete=sum(is.na(dfcomplete))
 ```
 
-The number of records with missing data is now `r NumberNAComplete` compared to `r NumberNA` .  
+The number of records with missing data is now 0 compared to 2304 .  
 
 To compare to the original result, the complete data frame is prepared by grouping by date and calculating the total steps per day.
-```{R}
+
+```r
 dfcompleteg<-group_by(dfcomplete,date)
 dfcompletes <- summarise(dfcompleteg,TotalSteps=sum(steps,na.rm=TRUE))
 ```
 
 Plot a histogram of the results:  
-```{R}
+
+```r
 hist(dfcompletes$TotalSteps,col="blue",main="Total Steps per Day",xlab="Total Steps")
 
 # Calculate the mean and median total steps per day. Round to mean whole number
@@ -164,8 +214,10 @@ abline(v=MedianStepsComplete,lty=3,lwd=2,col="red")
 legend("topright", lty=c(2,3),lwd=2,col="red",legend=c("Mean","Median"))
 ```
 
-The mean total number of steps per day is now `r MeanStepsComplete` compared to `r MeanSteps`.  
-The median total number of steps is now `r MedianStepsComplete`, compared to `r MedianSteps`.
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
+The mean total number of steps per day is now 9354 compared to 9354.  
+The median total number of steps is now 1.0395\times 10^{4}, compared to 10395.
 
 Therefore replacing missing values with the average value, instead of ignoring them does not change the mean or median results.  
 
@@ -175,7 +227,8 @@ Therefore replacing missing values with the average value, instead of ignoring t
 Using the same data frame from the previous section, we want to understand if the activity pattern changes from weekdays to weekends.
 
 The dataframe must be updated with the day of the week and  classified as a weekday or weekend:
-```{R}
+
+```r
 # add a new field containing the day of the week using weekdays(). the date field is character class
 # so is temporarily converted to a date class with as.Date()
 dfcomplete<-mutate(dfcomplete,DayofWeek=weekdays(as.Date(date,"%Y-%m-%d")))
@@ -193,17 +246,19 @@ dayfactor<-factor(dfcomplete$DayofWeek,levels=daynames,labels=WDWE)
 dfcomplete<-mutate(dfcomplete,DayFactor=dayfactor)
 ```
 
-Now the data set is prepared, it is grouped by DayFactor (weekend/weekday) and the interval.  
-```{R}
-dfcompletei<-group_by(dfcomplete,DayFactor,interval)
-dfcompleteia<-summarise(dfcompletei,AverageSteps=mean(steps,na.rm=TRUE))
+Now the data set is prepared, it is grouped by DayFactore (weekend/weekday) and the interval.  
+
+```r
+dfcompletea<-group_by(dfcomplete,DayFactor,interval)
+dfcompleteaa<-summarise(dfcompletea,AverageSteps=mean(steps,na.rm=TRUE))
 ```
 
 
-The trends for Weekday and Weekend activity are best understood with a time series plots for each.
-```{R}
-p<-xyplot(dfcompleteia$AverageSteps~dfcompleteia$interval|dfcompleteia$DayFactor,
-          data=dfcompleteia,
+The trends for Weekday and Weekend activity is best undestod with a time series plots for each.
+
+```r
+p<-xyplot(dfcompleteaa$AverageSteps~dfcompleteaa$interval|dfcompleteaa$DayFactor,
+          data=dfcompleteaa,
           layout=c(1,2),
           type="l",
           xlab="Interval",
@@ -211,5 +266,7 @@ p<-xyplot(dfcompleteia$AverageSteps~dfcompleteia$interval|dfcompleteia$DayFactor
           main="Average steps per 5-Minute Interval")
 print(p)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
 More activity is observed on weekday mornings however the overall average number of steps is higher during the weekend. This indicates the test subject may have been an office based worked who had a higher number of steps commuting to work and spent the day at their desk.  
